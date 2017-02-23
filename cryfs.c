@@ -11,7 +11,7 @@
  *  @param blocos número de blocos do arquivo
  *  @return SUCCESSO ou FALHA
  */
-int initfs(char ** arquivo, int blocos) {
+int initfs(char * arquivo, int blocos) {
 }
 
 
@@ -21,7 +21,7 @@ int initfs(char ** arquivo, int blocos) {
  *  @return ponteiro para descritor de sistema de arquivos ou FALHA
  */
 
-cry_desc_t * cry_openfs(char ** arquivo) {
+cry_desc_t * cry_openfs(char * arquivo) {
 }
 
 
