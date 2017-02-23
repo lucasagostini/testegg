@@ -58,7 +58,7 @@ cry_desc_t * openfs(char* name) {
 void teste6() {
 	DESCRIBE("Testa a abertura de um ou mais arquivos");
 	WHEN("Sistema de arquivos ja existe, mas o arquivo nao");
-	IF("Arquivo nao existe e atributo e de LEITURAESCRITA");
+	IF("Arquivo nao existe e atributo eh de LEITURAESCRITA");
 	THEN("O arquivo deve ser criado e a funcao retorna o file handler");
 	cry_desc_t * fs = openfs("dc/cripto6");
 	isNotEqual(cry_open(fs, "arquivo1", LEITURAESCRITA, 0), 0);
@@ -66,7 +66,7 @@ void teste6() {
 
 void teste7() {
 	DESCRIBE("Testa a abertura de um ou mais arquivos");
-	WHEN("Um mesmo arquivo e aberto mais de uma vez");
+	WHEN("Um mesmo arquivo eh aberto mais de uma vez");
 	IF("Arquivo ja esta aberto");
 	THEN("O File Handler retornado deve ser o do arquivo ja aberto");
 	cry_desc_t * fs = openfs("dc/cripto7");
@@ -85,12 +85,63 @@ void teste8() {
 void teste9() {
 	DESCRIBE("Testa a abertura de um ou mais arquivos");
 	WHEN("O acesso e de LEITURA");
-	IF("Acesso e LEITURA e arquivo nao existe");
+	IF("Acesso eh LEITURA e arquivo nao existe");
 	THEN("A funcao deve retornar FALHA");
 	cry_desc_t * fs = openfs("dc/cripto9");
 	isEqual(cry_open(fs, "arquivo1", LEITURA, 0), 0);
 }
 
+void teste10() {
+	DESCRIBE("Testa o fechamento de um arquivo");
+	WHEN("O File Handler eh passado como parametro");
+	IF("Arquivo esta aberto");
+	THEN("A funcao deve retornar SUCESSO");
+	cry_desc_t * fs = openfs("dc/cripto10");
+	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isEqual(cry_close(indice), 1);
+}
+
+/*
+void teste32() {
+	DESCRIBE("Testa a modificacao do ponteiro de seek");
+	WHEN("O File Handler eh passado como parametro junto com a posicao desejada");
+	IF("Arquivo existe");
+	THEN("A funcao deve retornar SUCESSO");
+	cry_desc_t * fs = openfs("dc/cripto32");
+	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isNotEqual(cry_seek(indice, 320), 0);
+}
+
+void teste33() {
+	DESCRIBE("Testa a leitura do tempo de criacao do arquivo");
+	WHEN("O File Handler eh passado como parametro");
+	IF("Arquivo existe");
+	THEN("A funcao deve retornar o tempo de criacao do mesmo");
+	cry_desc_t * fs = openfs("dc/cripto33");
+	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isNotEqual(cry_creation(indice), 0);
+}
+
+void teste34() {
+	DESCRIBE("Testa a leitura do tempo de acesso do arquivo");
+	WHEN("O File Handler eh passado como parametro");
+	IF("Arquivo existe");
+	THEN("A funcao deve retornar o tempo de criacao do mesmo");
+	cry_desc_t * fs = openfs("dc/cripto34");
+	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isNotEqual(cry_accessed(indice), 0);
+}
+
+void teste35() {
+	DESCRIBE("Testa a leitura do tempo de modificacao do arquivo");
+	WHEN("O File Handler eh passado como parametro");
+	IF("Arquivo existe");
+	THEN("A funcao deve retornar o tempo de modificacao do mesmo");
+	cry_desc_t * fs = openfs("dc/cripto35");
+	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isNotEqual(cry_last_modified(indice), 0);
+}
+*/
 int main() {
 	teste1();
 	teste2();
@@ -101,5 +152,6 @@ int main() {
 	teste7();
 	teste8();
 	teste9();
+	teste10();
 	return 0;
 }
