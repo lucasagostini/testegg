@@ -6,8 +6,8 @@ $(OUTDIR)/cryfs.o: cryfs.h cryfs.c
 	$(CC) $(CFLAGS) cryfs.c -c -o $@
 
 teste: $(OUTDIR)/cryfs.o simpletest.h teste.c
-	$(CC) $(CFLAGS) teste.c -o $(OUTDIR)/$@
+	$(CC) $(CFLAGS) teste.c $(OUTDIR)/cryfs.o -o $(OUTDIR)/$@
 	./$(OUTDIR)/teste
 
 clean:
-	rm -f *.o $(OUTDIR)/*
+	rm -f *.o $(OUTDIR)/* dc/*

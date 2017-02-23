@@ -1,4 +1,5 @@
 #include "cryfs.h"
+#include <unistd.h>
 
 /** Inicializa o arquivo no sistema de arquivos hospedeiro.
  *
@@ -11,7 +12,18 @@
  *  @param blocos número de blocos do arquivo
  *  @return SUCCESSO ou FALHA
  */
+
+const int BLOCOS_MIN = (sizeof(descritor_t) * 256 / 4096) + 1;
+
 int initfs(char * arquivo, int blocos) {
+  if (blocos < BLOCOS_MIN) {
+    return FALHA;
+  }
+  if (access(arquivo,F_OK) != -1) {
+    return FALHA;
+  }
+  FILE* fp = fopen(arquivo, "w+");
+  return SUCESSO;
 }
 
 
