@@ -1,12 +1,9 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "cryfs.h"
 #include "simpletest.h"
-
-void descriptor_cleaner() {
-
-}
 
 void teste1() {
 	DESCRIBE("Testa criacao sistema de arquivos");
@@ -101,6 +98,67 @@ void teste10() {
 	isEqual(cry_close(indice), 1);
 }
 
+void teste11() {
+	DESCRIBE("11");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto11");
+	int indice1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_open(fs, "arquivo2", LEITURAESCRITA, 0);
+	cry_close(indice1);
+	isEqual(cry_open(fs, "arquivo3", LEITURAESCRITA, 0), 1);
+}
+
+void teste12() {
+	DESCRIBE("12");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto12");
+	char str[12];
+	for (int i = 1; i <= 256; i++) {
+		sprintf(str, "%d", i);
+		if (cry_open(fs, strcat(str,"arquivo"), LEITURAESCRITA, 0) == FALHA) {
+			isEqual(0, 1);
+		}
+	}
+	isEqual(1, 1);
+}
+
+void teste13() {
+	DESCRIBE("13");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto13");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isEqual(cry_write(arquivo, 3, "abc"), SUCESSO);
+}
+
+void teste14() {
+	DESCRIBE("14");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto14");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_close(arquivo);
+	isEqual(cry_write(arquivo, 3, "abc"), FALHA);
+}
+
+void teste15() {
+	DESCRIBE("15");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto15");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_close(arquivo);
+	arquivo = cry_open(fs, "arquivo1", LEITURA, 0);
+	isEqual(cry_write(arquivo, 3, "abc"), FALHA);
+}
+
 /*
 void teste32() {
 	DESCRIBE("Testa a modificacao do ponteiro de seek");
@@ -153,5 +211,10 @@ int main() {
 	teste8();
 	teste9();
 	teste10();
+	teste11();
+	teste12();
+	teste13();
+	teste14();
+	teste15();
 	return 0;
 }
