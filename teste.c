@@ -280,6 +280,58 @@ void teste25() {
 	isNotEqual(cry_last_modified(indice), 0);
 }
 
+void teste26() {
+	DESCRIBE("Testa leitura de um mesmo arquivo com duas chaves diferentes");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto26");
+	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
+	cry_write(arquivo1, 7, "teste26");
+	char out1[7],out2[7];
+	int lidos = cry_read(arquivo, 8, out1);
+	isEqual(lidos, 7);
+	int arquivo2 = cry_open(fs, "arquivo1", LEITURAESCRITA, 3);
+	lidos = cry_read(arquivo, 8, out1);
+	isEqual(lidos, 7);
+	isNotEqual(!strncmp(out1, out2, lidos), 0);
+}
+
+
+void teste27() {
+	DESCRIBE("Testa leitura de um arquivo criptografado");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto27");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
+	cry_write(arquivo, 7, "teste27");
+	char out[7];
+	int lidos = cry_read(arquivo, 8, out);
+	isEqual(lidos, 7);
+	isEqual(strncmp(out, "teste27", lidos), 0);
+}
+
+void teste28() {
+	DESCRIBE("Testa leitura de um mesmo arquivo com duas criptografias diferentes");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto28");
+	char out1[7],out2[7];
+	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
+	cry_write(arquivo1, 7, "teste28");
+	int lidos1 = cry_read(arquivo1, 8, out1);
+	isEqual(lidos1, 7);
+	cry_close(arquivo1);
+	int arquivo2 = cry_open(fs, "arquivo1", LEITURAESCRITA, 3);
+	cry_write(arquivo2, 7, "teste28");
+	cry_seek(arquivo2, 7);
+	int lidos2 = cry_read(arquivo2, 8, out2);
+	isEqual(lidos2, 7);
+	cry_close(arquivo2);
+	isEqual(strncmp(out1, out2, lidos), 0);
+}
 int main() {
 	teste1();
 	teste2();
@@ -306,5 +358,8 @@ int main() {
 	teste23();
 	teste24();
 	teste25();
+	teste26();
+	teste27();
+	teste28();
 	return 0;
 }
