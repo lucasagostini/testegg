@@ -102,6 +102,7 @@ int create_file(cry_desc_t * cry_desc, char * nome) {
   }
   strcpy(cry_desc->descritores[i].nome, nome);
   cry_desc->descritores[i].tamanho = 0;
+  time(&cry_desc->descritores[i].criacao);
   int bloco = procura_bloco_livre();
   bloco_inicial[i] = bloco;
   blocost[bloco].dono = i;
@@ -137,6 +138,7 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
     position = create_file(cry_desc, nome);
   }
   
+  time(&cry_desc->descritores[position].ultimo_acesso);
   cry_desc->abertos[indice_aberto].arquivo = &cry_desc->descritores[position];
   cry_desc->abertos[indice_aberto].acesso = acesso;
   cry_desc->abertos[indice_aberto].posicao = cry_desc->abertos[indice_aberto].arquivo->tamanho;
@@ -178,7 +180,38 @@ int bloco_atual(arquivo_aberto_t* aberto) {
  * @return número de bytes lidos
  */
 uint32_t cry_read(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    printf("Nao existe\n");
+    return FALHA;
+  }
+  
+  if (descritor_fs.abertos[indice].acesso == ESCRITA) {
+    printf("Nao pode ler\n");
+    return FALHA;
+  }
+  
+  arquivo_aberto_t* aberto = &descritor_fs.abertos[indice];
+  
+  int a_ler = tamanho;
+  int atual = bloco_atual(aberto);
+  int posicao_no_bloco = aberto->posicao % BLOCO;
+  
+  printf("Bloco atual = %d, posicao no bloco = %d\n", atual, posicao_no_bloco);
+
+  fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
+  int lidos = fread(buffer, sizeof(char), MIN(a_ler, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
+  a_ler -= MIN(a_ler, BLOCO - posicao_no_bloco);
+  
+  while (a_ler > 0) {
+      blocost[atual] = *blocost[atual].next;
+      atual = blocost[atual].indice;
+      fseek(descritor_fs.arquivo_host, atual * BLOCO, SEEK_SET);
+      lidos += fread(buffer + lidos, sizeof(char), MIN(a_ler, BLOCO), descritor_fs.arquivo_host);
+      a_ler -= BLOCO;
+  }
+  
+  return lidos;
 }
 
 /** Escreve bytes em um arquivo criptografado aberto.
@@ -203,18 +236,10 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   arquivo_aberto_t* aberto = &descritor_fs.abertos[indice];
   descritor_t* desc = descritor_fs.abertos[indice].arquivo;
   
-  int blocos_escrever;
-  if (tamanho % BLOCO == 0) {
-    blocos_escrever = tamanho / BLOCO;
-  } else {
-    blocos_escrever = (tamanho / BLOCO) + 1;
-  }
-  
-  int posicao_no_bloco = aberto->posicao % BLOCO;
-  aberto->posicao += tamanho;
-  if (aberto->posicao > desc->tamanho) {
-    desc->tamanho = aberto->posicao;
-  }
+  int posicao_no_bloco = desc->tamanho % BLOCO;
+  // if desc->tamanho == aberto->posicao (maybe)
+  // aberto->posicao += tamanho;
+  desc->tamanho += tamanho;
   
   int a_escrever = tamanho;
   int atual = bloco_atual(aberto);
@@ -237,8 +262,17 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   // int disponivel = blocos_livres()*4096 + (tamanho - posicao%4096);
   // tamanho - posicao + blocos_livres()*4096;
   // for ()
-  
+  time(&desc->modificacao);
   return SUCESSO;
+}
+
+int ultimo_bloco_livre() {
+  for (int i = 0; i < num_blocos; i++) {
+    if(blocost[i].next == NULL && blocost[i].dono == -1) {
+      return i;
+    }
+  }
+  return -1;
 }
 
 /** Apaga um arquivo e o fecha.
@@ -248,7 +282,27 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
  */
 
 int cry_delete(indice_arquivo_t arquivo) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    return FALHA;
+  }
+  
+  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  desc->nome[0] = 0;
+  desc->criacao = 0;
+  desc->modificacao = 0;
+  desc->ultimo_acesso = 0;
+  desc->tamanho = 0;
+  
+  int livre = ultimo_bloco_livre();
+  blocost[livre].next = &blocost[bloco_inicial[indice]];
+  int atual = bloco_inicial[indice];
+  do {
+    blocost[atual].dono = -1;
+  } while (blocost[atual++].next != NULL);
+  
+  descritor_fs.abertos[indice].arquivo = NULL;
+  return SUCESSO;
 }
 
 /** Modifica a posição atual de leitura ou escrita do arquivo
@@ -258,7 +312,17 @@ int cry_delete(indice_arquivo_t arquivo) {
  * @return SUCESSO ou FALHA
  */
 int cry_seek(indice_arquivo_t arquivo, uint32_t seek) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    return FALHA;
+  }
+  
+  if (seek > descritor_fs.abertos[indice].arquivo->tamanho) {
+    return FALHA;
+  }
+  
+  descritor_fs.abertos[indice].posicao = seek;
+  return SUCESSO;
 }
 
 /** Retorna o tempo em que o arquivo foi criado
@@ -267,7 +331,13 @@ int cry_seek(indice_arquivo_t arquivo, uint32_t seek) {
  * @return tempo
  */
 time_t cry_creation(indice_arquivo_t arquivo) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    return FALHA;
+  }
+  
+  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  return desc->criacao;
 }
 
 /** Retorna o tempo em que o arquivo foi acessado
@@ -276,7 +346,13 @@ time_t cry_creation(indice_arquivo_t arquivo) {
  * @return tempo
  */
 time_t cry_accessed(indice_arquivo_t arquivo) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    return FALHA;
+  }
+  
+  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  return desc->ultimo_acesso;
 }
 
 /** Retorna o tempo em que o arquivo foi modificado
@@ -285,5 +361,11 @@ time_t cry_accessed(indice_arquivo_t arquivo) {
  * @return tempo
  */
 time_t cry_last_modified(indice_arquivo_t arquivo) {
-  return FALHA;
+  int indice = arquivo - 1;
+  if (descritor_fs.abertos[indice].arquivo == NULL) {
+    return FALHA;
+  }
+  
+  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  return desc->modificacao;
 }

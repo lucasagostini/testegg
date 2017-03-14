@@ -159,47 +159,127 @@ void teste15() {
 	isEqual(cry_write(arquivo, 3, "abc"), FALHA);
 }
 
-/*
-void teste32() {
-	DESCRIBE("Testa a modificacao do ponteiro de seek");
-	WHEN("O File Handler eh passado como parametro junto com a posicao desejada");
-	IF("Arquivo existe");
-	THEN("A funcao deve retornar SUCESSO");
-	cry_desc_t * fs = openfs("dc/cripto32");
-	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
-	isNotEqual(cry_seek(indice, 320), 0);
+void teste16() {
+	DESCRIBE("16");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto16");
+	int arquivo = cry_open(fs, "arquivo1", ESCRITA, 0);
+	char out[100];
+	isEqual(cry_read(arquivo, 100, out), FALHA);
 }
 
-void teste33() {
+void teste17() {
+	DESCRIBE("17");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto17");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste17");
+	char out[7];
+	int lidos = cry_read(arquivo, 8, out);
+	isEqual(lidos, 7);
+	isEqual(strncmp(out, "teste17", lidos), 0);
+}
+
+void teste18() {
+	DESCRIBE("18");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto18");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste18");
+	char out[5];
+	isEqual(cry_seek(arquivo, 2), SUCESSO);
+	int lidos = cry_read(arquivo, 8, out);
+	isEqual(lidos, 5);
+	isEqual(strncmp(out, "ste18", lidos), 0);
+}
+
+void teste19() {
+	DESCRIBE("19");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto19");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste19");
+	isEqual(cry_seek(arquivo, 7), SUCESSO);
+}
+
+void teste20() {
+	DESCRIBE("20");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto20");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste20");
+	isEqual(cry_seek(arquivo, 8), FALHA);
+}
+
+void teste21() {
+	DESCRIBE("21");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto21");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste21");
+	cry_delete(arquivo);
+	arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	isEqual(cry_seek(arquivo, 1), FALHA);
+}
+
+void teste22() {
+	DESCRIBE("22");
+	WHEN("");
+	IF("");
+	THEN("");
+	cry_desc_t * fs = openfs("dc/cripto22");
+	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(arquivo, 7, "teste22");
+	cry_delete(arquivo);
+	arquivo = cry_open(fs, "arquivo1", LEITURA, 0);
+	isEqual(arquivo, FALHA);
+}
+
+void teste23() {
 	DESCRIBE("Testa a leitura do tempo de criacao do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de criacao do mesmo");
-	cry_desc_t * fs = openfs("dc/cripto33");
+	cry_desc_t * fs = openfs("dc/cripto23");
 	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	isNotEqual(cry_creation(indice), 0);
+	isEqual(cry_last_modified(indice), 0);
 }
 
-void teste34() {
+void teste24() {
 	DESCRIBE("Testa a leitura do tempo de acesso do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de criacao do mesmo");
-	cry_desc_t * fs = openfs("dc/cripto34");
+	cry_desc_t * fs = openfs("dc/cripto24");
 	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	isNotEqual(cry_accessed(indice), 0);
+	isEqual(cry_last_modified(indice), 0);
 }
 
-void teste35() {
+void teste25() {
 	DESCRIBE("Testa a leitura do tempo de modificacao do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de modificacao do mesmo");
-	cry_desc_t * fs = openfs("dc/cripto35");
+	cry_desc_t * fs = openfs("dc/cripto25");
 	int indice = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
+	cry_write(indice, 7, "teste25");
 	isNotEqual(cry_last_modified(indice), 0);
 }
-*/
+
 int main() {
 	teste1();
 	teste2();
@@ -216,5 +296,15 @@ int main() {
 	teste13();
 	teste14();
 	teste15();
+	teste16();
+	teste17();
+	teste18();
+	teste19();
+	teste20();
+	teste21();
+	teste22();
+	teste23();
+	teste24();
+	teste25();
 	return 0;
 }
