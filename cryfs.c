@@ -18,7 +18,7 @@
 
 const int BLOCOS_MIN = (sizeof(descritor_t) * 256 / 4096) + 1;
 
-cry_desc_t descritor_fs;
+cry_desc_t* descritor_fs;
 
 typedef struct bloco {
   struct bloco *next;
@@ -31,6 +31,7 @@ bloco_t blocost[3000000000];
 int num_blocos;
 
 int bloco_inicial[256];
+int cripto[256];
 
 int initfs(char * arquivo, int blocos) {
   if (blocos < BLOCOS_MIN) {
@@ -39,10 +40,11 @@ int initfs(char * arquivo, int blocos) {
   if (access(arquivo,F_OK) != -1) {
     return FALHA;
   }
+  descritor_fs = (cry_desc_t*)malloc(sizeof(cry_desc_t));
 
   for(int i = 0; i < 256; i++) {
-    descritor_fs.descritores[i].nome[0] = 0;
-    descritor_fs.abertos[i].arquivo = NULL;
+    descritor_fs->descritores[i].nome[0] = 0;
+    descritor_fs->abertos[i].arquivo = NULL;
   }
   
   num_blocos = blocos;
@@ -73,13 +75,13 @@ cry_desc_t * cry_openfs(char * arquivo) {
     return FALHA;
   }
   FILE* fp = fopen(arquivo, "r+");
-  descritor_fs.arquivo_host = fp;
-  return &descritor_fs;
+  descritor_fs->arquivo_host = fp;
+  return descritor_fs;
 }
 
 int procura_nome(cry_desc_t *desc, char *nome) {
   for (int i = 0; i < 256; ++i) {
-    if(!strcmp(desc->descritores[i].nome, nome)) {
+    if(strcmp(desc->descritores[i].nome, nome) == 0) {
       return i;
     }
   }
@@ -102,6 +104,7 @@ int create_file(cry_desc_t * cry_desc, char * nome) {
       break;
     }
   }
+  
   strcpy(cry_desc->descritores[i].nome, nome);
   cry_desc->descritores[i].tamanho = 0;
   time(&cry_desc->descritores[i].criacao);
@@ -130,11 +133,11 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
     if (cry_desc->abertos[indice_aberto].arquivo == NULL) {
       break;
     }
-    if (!strcmp(cry_desc->abertos[indice_aberto].arquivo->nome, nome)) {
+    if (strcmp(cry_desc->abertos[indice_aberto].arquivo->nome, nome) == 0) {
       return indice_aberto + 1;
     }
   }
-
+  
   int position = procura_nome(cry_desc, nome);
   if (position == -1) {
     if (acesso == LEITURA) {
@@ -150,6 +153,8 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
   cry_desc->abertos[indice_aberto].arquivo = &cry_desc->descritores[position];
   cry_desc->abertos[indice_aberto].acesso = acesso;
   cry_desc->abertos[indice_aberto].posicao = 0;
+  cripto[indice_aberto] = deslocamento;
+    
   return indice_aberto + 1;
 }
 
@@ -160,18 +165,18 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
  */
 int cry_close(indice_arquivo_t arquivo) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  descritor_fs.abertos[indice].arquivo = NULL;
+  descritor_fs->abertos[indice].arquivo = NULL;
   return SUCESSO;
 }
 
 int bloco_atual(arquivo_aberto_t* aberto) {
   int i;
   for (i = 0; i < 256; i++) {
-    if (aberto->arquivo == &descritor_fs.descritores[i]) {
+    if (aberto->arquivo == &descritor_fs->descritores[i]) {
       break;
     }
   }
@@ -187,7 +192,7 @@ int bloco_atual(arquivo_aberto_t* aberto) {
 int ultimo_bloco(arquivo_aberto_t* aberto) {
   int i;
   for (i = 0; i < 256; i++) {
-    if (aberto->arquivo == &descritor_fs.descritores[i]) {
+    if (aberto->arquivo == &descritor_fs->descritores[i]) {
       break;
     }
   }
@@ -208,34 +213,39 @@ int ultimo_bloco(arquivo_aberto_t* aberto) {
  */
 uint32_t cry_read(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
-    printf("Nao existe\n");
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  if (descritor_fs.abertos[indice].acesso == ESCRITA) {
-    printf("Nao pode ler\n");
+  if (descritor_fs->abertos[indice].acesso == ESCRITA) {
     return FALHA;
   }
   
-  arquivo_aberto_t* aberto = &descritor_fs.abertos[indice];
+  arquivo_aberto_t* aberto = &descritor_fs->abertos[indice];
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   
   int a_ler = tamanho;
+  if (a_ler > desc->tamanho - aberto->posicao) {
+      return FALHA;
+  }
   int atual = bloco_atual(aberto);
   int posicao_no_bloco = aberto->posicao % BLOCO;
   
-  //printf("Bloco atual = %d, posicao no bloco = %d\n", atual, posicao_no_bloco);
-
-  fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
-  int lidos = fread(buffer, sizeof(char), MIN(a_ler, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
+  fseek(descritor_fs->arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
+  int lidos = fread(buffer, sizeof(char), MIN(a_ler, BLOCO - posicao_no_bloco), descritor_fs->arquivo_host);
   a_ler -= MIN(a_ler, BLOCO - posicao_no_bloco);
   
   while (a_ler > 0) {
       blocost[atual] = *blocost[atual].next;
       atual = blocost[atual].indice;
-      fseek(descritor_fs.arquivo_host, atual * BLOCO, SEEK_SET);
-      lidos += fread(buffer + lidos, sizeof(char), MIN(a_ler, BLOCO), descritor_fs.arquivo_host);
+      fseek(descritor_fs->arquivo_host, atual * BLOCO, SEEK_SET);
+      lidos += fread(buffer + lidos, sizeof(char), MIN(a_ler, BLOCO), descritor_fs->arquivo_host);
       a_ler -= BLOCO;
+  }
+  
+  int desc_index = procura_nome(descritor_fs, desc->nome);
+  for(int i = 0; i < tamanho; i++){
+      buffer[i] -= cripto[desc_index];
   }
   
   return lidos;
@@ -252,25 +262,31 @@ uint32_t cry_read(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
  */
 int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  if (descritor_fs.abertos[indice].acesso == LEITURA) {
+  if (descritor_fs->abertos[indice].acesso == LEITURA) {
     return FALHA;
   }
   
-  arquivo_aberto_t* aberto = &descritor_fs.abertos[indice];
-  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  arquivo_aberto_t* aberto = &descritor_fs->abertos[indice];
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   
   int posicao_no_bloco = desc->tamanho % BLOCO;
   desc->tamanho += tamanho;
   
   int a_escrever = tamanho;
   int atual = ultimo_bloco(aberto);
-  fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
-  //printf("posicao = %d\n", atual * 4096 + posicao_no_bloco);
-  fwrite(buffer, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
+  char buf[tamanho];
+  strncpy(buf, buffer, tamanho);
+  int desc_index = procura_nome(descritor_fs, desc->nome);
+  for(int i = 0; i < tamanho; i++){
+      buf[i] += cripto[desc_index];
+  }
+  fseek(descritor_fs->arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
+  fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs->arquivo_host);
+
   a_escrever -= MIN(a_escrever, BLOCO - posicao_no_bloco);
   
   while (a_escrever > 0) {
@@ -282,8 +298,8 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
       blocost[bloco_livre].next = NULL;
       blocost[bloco_livre].dono = blocost[atual].dono;
       atual = bloco_livre;
-      fseek(descritor_fs.arquivo_host, atual * BLOCO, SEEK_SET);
-      fwrite(buffer, sizeof(char), MIN(a_escrever, BLOCO), descritor_fs.arquivo_host);
+      fseek(descritor_fs->arquivo_host, atual * BLOCO, SEEK_SET);
+      fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO), descritor_fs->arquivo_host);
       a_escrever -= BLOCO;
   }
   
@@ -312,11 +328,11 @@ int ultimo_bloco_livre() {
 
 int cry_delete(indice_arquivo_t arquivo) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   desc->nome[0] = 0;
   desc->criacao = 0;
   desc->modificacao = 0;
@@ -324,13 +340,14 @@ int cry_delete(indice_arquivo_t arquivo) {
   desc->tamanho = 0;
   
   int livre = ultimo_bloco_livre();
-  blocost[livre].next = &blocost[bloco_inicial[indice]];
+  int desc_index = procura_nome(descritor_fs, desc->nome);
+  blocost[livre].next = &blocost[bloco_inicial[desc_index]];
   int atual = bloco_inicial[indice];
   do {
     blocost[atual].dono = -1;
   } while (blocost[atual++].next != NULL);
   
-  descritor_fs.abertos[indice].arquivo = NULL;
+  descritor_fs->abertos[indice].arquivo = NULL;
   return SUCESSO;
 }
 
@@ -342,15 +359,15 @@ int cry_delete(indice_arquivo_t arquivo) {
  */
 int cry_seek(indice_arquivo_t arquivo, uint32_t seek) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
-  
-  if (seek > descritor_fs.abertos[indice].arquivo->tamanho) {
+  if (seek > descritor_fs->abertos[indice].arquivo->tamanho) {
     return FALHA;
   }
-  
-  descritor_fs.abertos[indice].posicao = seek;
+
+  descritor_fs->abertos[indice].posicao = seek;
+
   return SUCESSO;
 }
 
@@ -361,11 +378,11 @@ int cry_seek(indice_arquivo_t arquivo, uint32_t seek) {
  */
 time_t cry_creation(indice_arquivo_t arquivo) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   return desc->criacao;
 }
 
@@ -376,11 +393,11 @@ time_t cry_creation(indice_arquivo_t arquivo) {
  */
 time_t cry_accessed(indice_arquivo_t arquivo) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   return desc->ultimo_acesso;
 }
 
@@ -391,10 +408,10 @@ time_t cry_accessed(indice_arquivo_t arquivo) {
  */
 time_t cry_last_modified(indice_arquivo_t arquivo) {
   int indice = arquivo - 1;
-  if (descritor_fs.abertos[indice].arquivo == NULL) {
+  if (descritor_fs->abertos[indice].arquivo == NULL) {
     return FALHA;
   }
   
-  descritor_t* desc = descritor_fs.abertos[indice].arquivo;
+  descritor_t* desc = descritor_fs->abertos[indice].arquivo;
   return desc->modificacao;
 }
