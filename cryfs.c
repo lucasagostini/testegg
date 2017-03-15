@@ -26,6 +26,7 @@ typedef struct bloco {
   indice_arquivo_t dono;
 } bloco_t;
 
+bloco_t* livre;
 bloco_t blocost[3000000000];
 int num_blocos;
 
@@ -54,6 +55,7 @@ int initfs(char * arquivo, int blocos) {
   blocost[i].next = NULL;
   blocost[i].indice = i;
   blocost[i].dono = -1;
+  livre = &blocost[20];
   
   FILE* fp = fopen(arquivo, "w+");
   return (fp != 0) ? SUCESSO : FALHA;
@@ -85,12 +87,12 @@ int procura_nome(cry_desc_t *desc, char *nome) {
 }
 
 int procura_bloco_livre() {
-  for(int i = 0; i < num_blocos; i++) {
-    if (blocost[i].dono == -1) {
-      return i;
-    }
+  bloco_t* livre_copy = livre;
+  if(livre == NULL) {
+      return FALHA;
   }
-  return num_blocos;
+  livre = livre->next;
+  return livre_copy->indice;
 }
 
 int create_file(cry_desc_t * cry_desc, char * nome) {
@@ -104,6 +106,9 @@ int create_file(cry_desc_t * cry_desc, char * nome) {
   cry_desc->descritores[i].tamanho = 0;
   time(&cry_desc->descritores[i].criacao);
   int bloco = procura_bloco_livre();
+  if(bloco == FALHA) {
+      return -1;
+  }
   bloco_inicial[i] = bloco;
   blocost[bloco].dono = i;
   blocost[bloco].next = NULL;
@@ -136,6 +141,9 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
       return FALHA;
     }
     position = create_file(cry_desc, nome);
+    if(position == -1) {
+        return FALHA;
+    }
   }
   
   time(&cry_desc->descritores[position].ultimo_acesso);
@@ -261,12 +269,15 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   int a_escrever = tamanho;
   int atual = ultimo_bloco(aberto);
   fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
-  printf("posicao = %d\n", atual * 4096 + posicao_no_bloco);
+  //printf("posicao = %d\n", atual * 4096 + posicao_no_bloco);
   fwrite(buffer, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
   a_escrever -= MIN(a_escrever, BLOCO - posicao_no_bloco);
   
   while (a_escrever > 0) {
       int bloco_livre = procura_bloco_livre();
+      if(bloco_livre == FALHA) {
+          return FALHA;
+      }
       blocost[atual].next = &blocost[bloco_livre];
       blocost[bloco_livre].next = NULL;
       blocost[bloco_livre].dono = blocost[atual].dono;

@@ -48,7 +48,7 @@ void teste5() {
 }
 
 cry_desc_t * openfs(char* name) {
-	initfs(name,19);
+	initfs(name,1000);
 	return cry_openfs(name);
 }
 
