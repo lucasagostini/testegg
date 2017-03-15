@@ -99,10 +99,10 @@ void teste10() {
 }
 
 void teste11() {
-	DESCRIBE("11");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a abertura de um arquivo apos o fechamento de outro");
+	WHEN("O File Handler eh passado como parametro");
+	IF("Arquivo 1 esta aberto e 2 fechado");
+	THEN("A funcao deve retornar SUCESSO");
 	cry_desc_t * fs = openfs("dc/cripto11");
 	int indice1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_open(fs, "arquivo2", LEITURAESCRITA, 0);
@@ -111,10 +111,10 @@ void teste11() {
 }
 
 void teste12() {
-	DESCRIBE("12");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a abertura de 256 arquivos");
+	WHEN("Nao tem nenhum arquivo aberto");
+	IF("256 arquivos sao abertos");
+	THEN("A funcao deve retornar sucesso");
 	cry_desc_t * fs = openfs("dc/cripto12");
 	char str[12];
 	for (int i = 1; i <= 256; i++) {
@@ -127,20 +127,20 @@ void teste12() {
 }
 
 void teste13() {
-	DESCRIBE("13");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a escrita simples em um arquivo");
+	WHEN("Arquivo esta aberto");
+	IF("Temos espaco para escrever");
+	THEN("A funcao escreve e retorna sucesso");
 	cry_desc_t * fs = openfs("dc/cripto13");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	isEqual(cry_write(arquivo, 3, "abc"), SUCESSO);
 }
 
 void teste14() {
-	DESCRIBE("14");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a escrita simples em um arquivo");
+	WHEN("Arquivo esta fechado");
+	IF("Arquivo fechado");
+	THEN("A funcao retorna falha");
 	cry_desc_t * fs = openfs("dc/cripto14");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_close(arquivo);
@@ -148,10 +148,10 @@ void teste14() {
 }
 
 void teste15() {
-	DESCRIBE("15");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a escrita simples em um arquivo");
+	WHEN("Quando o arquivo eh fechado e depois reaberto");
+	IF("Arquivo esta aberto");
+	THEN("A funcao deve retornar SUCESSO");
 	cry_desc_t * fs = openfs("dc/cripto15");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_close(arquivo);
@@ -160,10 +160,10 @@ void teste15() {
 }
 
 void teste16() {
-	DESCRIBE("16");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a leitura simples de um arquivo");
+	WHEN("Ele esta vazio");
+	IF("Nao tem nada escrito");
+	THEN("A funcao nao pode ler nada, retorna falha");
 	cry_desc_t * fs = openfs("dc/cripto16");
 	int arquivo = cry_open(fs, "arquivo1", ESCRITA, 0);
 	char out[100];
@@ -171,10 +171,10 @@ void teste16() {
 }
 
 void teste17() {
-	DESCRIBE("17");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a leitura simples de um arquivo");
+	WHEN("Ele possui dados escritos");
+	IF("O que foi lido eh igual ao que foi escrito");
+	THEN("A funcao deve retornar sucesso");
 	cry_desc_t * fs = openfs("dc/cripto17");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste17");
@@ -185,10 +185,10 @@ void teste17() {
 }
 
 void teste18() {
-	DESCRIBE("18");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a funcao seek");
+	WHEN("Temos dados escritos no arquivo");
+	IF("Damos seek para a posicao 2 do arquivo");
+	THEN("A leitura deve ser feita a partir da segunda posicao");
 	cry_desc_t * fs = openfs("dc/cripto18");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste18");
@@ -200,10 +200,10 @@ void teste18() {
 }
 
 void teste19() {
-	DESCRIBE("19");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a funcao seek");
+	WHEN("Escrevemos 7 char em um arquivo");
+	IF("Damos seek para a posicao 7");
+	THEN("A funcao deve retornar sucesso");
 	cry_desc_t * fs = openfs("dc/cripto19");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste19");
@@ -211,10 +211,10 @@ void teste19() {
 }
 
 void teste20() {
-	DESCRIBE("20");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a funcao seek");
+	WHEN("Escrevemos 7 char em um arquivo");
+	IF("Damos seek para a posicao 8");
+	THEN("A funcao deve retornar falha");
 	cry_desc_t * fs = openfs("dc/cripto20");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste20");
@@ -222,10 +222,10 @@ void teste20() {
 }
 
 void teste21() {
-	DESCRIBE("21");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a funcao delete");
+	WHEN("Um arquivo existe com dados dentro");
+	IF("Mandamos deletar ele e depois recriar");
+	THEN("O arquivo deve estar vazio, entao o seek(1) deve retornar falha");
 	cry_desc_t * fs = openfs("dc/cripto21");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste21");
@@ -235,10 +235,10 @@ void teste21() {
 }
 
 void teste22() {
-	DESCRIBE("22");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa a funcao delete");
+	WHEN("Um arquivo existe com dados dentro");
+	IF("Mandamos deletar ele e depois abrir em modo leitura");
+	THEN("A abertura deve retornar falha pois o arquivo nao existe e o modo eh leitura");
 	cry_desc_t * fs = openfs("dc/cripto22");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 0);
 	cry_write(arquivo, 7, "teste22");
@@ -282,9 +282,9 @@ void teste25() {
 
 void teste26() {
 	DESCRIBE("Testa leitura de um mesmo arquivo com duas chaves diferentes");
-	WHEN("");
-	IF("");
-	THEN("");
+	WHEN("Abrimos um mesmo arquivo com duas chaves diferentes");
+	IF("Escrevermos com uma chave e depois lermos usando chaves diferentes");
+	THEN("As strings nao podem ser iguais");
 	cry_desc_t * fs = openfs("dc/cripto26");
 	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
 	cry_write(arquivo1, 7, "teste26");
@@ -299,10 +299,10 @@ void teste26() {
 
 
 void teste27() {
-	DESCRIBE("Testa leitura de um arquivo criptografado");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa leitura de um arquivo com uma chave");
+	WHEN("Abrimos um arquivo usando somente uma chave");
+	IF("Escrevermos com uma chave e depois lermos com a mesma chave");
+	THEN("As strings devem ser iguais");
 	cry_desc_t * fs = openfs("dc/cripto27");
 	int arquivo = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
 	cry_write(arquivo, 7, "teste27");
@@ -313,10 +313,10 @@ void teste27() {
 }
 
 void teste28() {
-	DESCRIBE("Testa leitura de um mesmo arquivo com duas criptografias diferentes");
-	WHEN("");
-	IF("");
-	THEN("");
+	DESCRIBE("Testa escrita/leitura de um mesmo arquivo com duas chaves diferentes");
+	WHEN("Abrimos um mesmo arquivo com duas chaves diferentes");
+	IF("Escrevermos com chaves diferentes e depois lermos usando a chave certa");
+	THEN("As strings devem fazer sentido e serem iguais");
 	cry_desc_t * fs = openfs("dc/cripto28");
 	char out1[7],out2[7];
 	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
@@ -332,6 +332,8 @@ void teste28() {
 	cry_close(arquivo2);
 	isEqual(strncmp(out1, out2, lidos), 0);
 }
+
+
 int main() {
 	teste1();
 	teste2();
