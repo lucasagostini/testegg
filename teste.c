@@ -289,12 +289,12 @@ void teste26() {
 	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
 	cry_write(arquivo1, 7, "teste26");
 	char out1[7],out2[7];
-	int lidos = cry_read(arquivo, 8, out1);
+	int lidos = cry_read(arquivo1, 8, out1);
 	isEqual(lidos, 7);
 	int arquivo2 = cry_open(fs, "arquivo1", LEITURAESCRITA, 3);
-	lidos = cry_read(arquivo, 8, out1);
+	lidos = cry_read(arquivo2, 8, out1);
 	isEqual(lidos, 7);
-	isNotEqual(!strncmp(out1, out2, lidos), 0);
+	isNotEqual(strncmp(out1, out2, lidos), 0);
 }
 
 
@@ -330,7 +330,7 @@ void teste28() {
 	int lidos2 = cry_read(arquivo2, 8, out2);
 	isEqual(lidos2, 7);
 	cry_close(arquivo2);
-	isEqual(strncmp(out1, out2, lidos), 0);
+	isEqual(strncmp(out1, out2, lidos2), 0);
 }
 
 

@@ -81,7 +81,7 @@ int procura_nome(cry_desc_t *desc, char *nome) {
       return i;
     }
   }
-  return 0;
+  return -1;
 }
 
 int procura_bloco_livre() {
@@ -131,7 +131,7 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
   }
 
   int position = procura_nome(cry_desc, nome);
-  if (position == 0) {
+  if (position == -1) {
     if (acesso == LEITURA) {
       return FALHA;
     }
@@ -141,7 +141,7 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
   time(&cry_desc->descritores[position].ultimo_acesso);
   cry_desc->abertos[indice_aberto].arquivo = &cry_desc->descritores[position];
   cry_desc->abertos[indice_aberto].acesso = acesso;
-  cry_desc->abertos[indice_aberto].posicao = cry_desc->abertos[indice_aberto].arquivo->tamanho;
+  cry_desc->abertos[indice_aberto].posicao = 0;
   return indice_aberto + 1;
 }
 
@@ -167,8 +167,27 @@ int bloco_atual(arquivo_aberto_t* aberto) {
       break;
     }
   }
+  
   int bloco_atual = bloco_inicial[i];
-  bloco_atual += aberto->posicao / BLOCO;
+  int blocos_a_avancar = aberto->posicao / BLOCO;
+  while(blocos_a_avancar--) {
+      bloco_atual = blocost[bloco_atual].next->indice;
+  }
+  return bloco_atual;
+}
+
+int ultimo_bloco(arquivo_aberto_t* aberto) {
+  int i;
+  for (i = 0; i < 256; i++) {
+    if (aberto->arquivo == &descritor_fs.descritores[i]) {
+      break;
+    }
+  }
+  
+  int bloco_atual = bloco_inicial[i];
+  while(blocost[bloco_atual].next != NULL) {
+      bloco_atual = blocost[bloco_atual].next->indice;
+  }
   return bloco_atual;
 }
 
@@ -197,7 +216,7 @@ uint32_t cry_read(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   int atual = bloco_atual(aberto);
   int posicao_no_bloco = aberto->posicao % BLOCO;
   
-  printf("Bloco atual = %d, posicao no bloco = %d\n", atual, posicao_no_bloco);
+  //printf("Bloco atual = %d, posicao no bloco = %d\n", atual, posicao_no_bloco);
 
   fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
   int lidos = fread(buffer, sizeof(char), MIN(a_ler, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
@@ -237,13 +256,12 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   descritor_t* desc = descritor_fs.abertos[indice].arquivo;
   
   int posicao_no_bloco = desc->tamanho % BLOCO;
-  // if desc->tamanho == aberto->posicao (maybe)
-  // aberto->posicao += tamanho;
   desc->tamanho += tamanho;
   
   int a_escrever = tamanho;
-  int atual = bloco_atual(aberto);
+  int atual = ultimo_bloco(aberto);
   fseek(descritor_fs.arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
+  printf("posicao = %d\n", atual * 4096 + posicao_no_bloco);
   fwrite(buffer, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs.arquivo_host);
   a_escrever -= MIN(a_escrever, BLOCO - posicao_no_bloco);
   
