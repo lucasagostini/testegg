@@ -1,10 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "crypfs.h"
+#include "cryfs.h"
 #include <assert.h>
 #include <string.h>
-
-#define SUCESSO SUCCESSO
 
 #define TESTDIR "a"
 
@@ -327,7 +325,7 @@ int test4(){
 
   /* quantidade razoavel de blocos */
 
-  if (initfs(fsname, METADADOS*1000)==SUCCESSO){
+  if (initfs(fsname, METADADOS*1000)==SUCESSO){
     OK(4,1);
   }
   else {

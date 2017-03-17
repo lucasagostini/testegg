@@ -286,7 +286,17 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   }
   fseek(descritor_fs->arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
   fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs->arquivo_host);
-
+	
+  if(a_escrever == BLOCO - posicao_no_bloco) {
+      int bloco_livre = procura_bloco_livre();
+      if(bloco_livre == FALHA) {
+          return FALHA;
+      }
+      blocost[atual].next = &blocost[bloco_livre];
+      blocost[bloco_livre].next = NULL;
+      blocost[bloco_livre].dono = blocost[atual].dono;
+  }
+  
   a_escrever -= MIN(a_escrever, BLOCO - posicao_no_bloco);
   
   while (a_escrever > 0) {
@@ -300,6 +310,17 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
       atual = bloco_livre;
       fseek(descritor_fs->arquivo_host, atual * BLOCO, SEEK_SET);
       fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO), descritor_fs->arquivo_host);
+      
+      if(a_escrever == BLOCO) {
+          int bloco_livre = procura_bloco_livre();
+          if(bloco_livre == FALHA) {
+              return FALHA;
+          }
+          blocost[atual].next = &blocost[bloco_livre];
+          blocost[bloco_livre].next = NULL;
+          blocost[bloco_livre].dono = blocost[atual].dono;
+      }
+      
       a_escrever -= BLOCO;
   }
   
@@ -333,19 +354,24 @@ int cry_delete(indice_arquivo_t arquivo) {
   }
   
   descritor_t* desc = descritor_fs->abertos[indice].arquivo;
+  
+  int bloco_livre = ultimo_bloco_livre();
+  int desc_index = procura_nome(descritor_fs, desc->nome);
+  if (bloco_livre == -1) {
+      livre = &blocost[bloco_inicial[desc_index]];
+  } else {
+    blocost[bloco_livre].next = &blocost[bloco_inicial[desc_index]];
+  }
+  int atual = bloco_inicial[desc_index];
+  do {
+    blocost[atual].dono = -1;
+  } while (blocost[atual++].next != NULL);
+  
   desc->nome[0] = 0;
   desc->criacao = 0;
   desc->modificacao = 0;
   desc->ultimo_acesso = 0;
   desc->tamanho = 0;
-  
-  int livre = ultimo_bloco_livre();
-  int desc_index = procura_nome(descritor_fs, desc->nome);
-  blocost[livre].next = &blocost[bloco_inicial[desc_index]];
-  int atual = bloco_inicial[indice];
-  do {
-    blocost[atual].dono = -1;
-  } while (blocost[atual++].next != NULL);
   
   descritor_fs->abertos[indice].arquivo = NULL;
   return SUCESSO;
