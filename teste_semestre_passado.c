@@ -387,7 +387,9 @@ int test4(){
       return grade;
     }
    // printf("FH --%d\n",FH );
-    if (strcmp(tmp,name)!=0){
+    int valor = strcmp(tmp,name);
+    if (valor!=0){
+      printf("%d\n",valor);
       FAIL(4,7);
       return grade+1;
     }
