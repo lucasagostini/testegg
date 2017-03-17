@@ -23,15 +23,15 @@ cry_desc_t* descritor_fs;
 typedef struct bloco {
   struct bloco *next;
   int indice;
-  indice_arquivo_t dono;
 } bloco_t;
 
 bloco_t* livre;
-bloco_t blocost[3000000000];
 int num_blocos;
-
+bloco_t blocost[3000000000];
 int bloco_inicial[256];
+
 int cripto[256];
+FILE* flog; 
 
 int initfs(char * arquivo, int blocos) {
   if (blocos < BLOCOS_MIN) {
@@ -52,14 +52,15 @@ int initfs(char * arquivo, int blocos) {
   for(i = 19; i < num_blocos - 1; i++) {
     blocost[i].next = &blocost[i+1];
     blocost[i].indice = i;
-    blocost[i].dono = -1;
   }
   blocost[i].next = NULL;
   blocost[i].indice = i;
-  blocost[i].dono = -1;
   livre = &blocost[20];
   
   FILE* fp = fopen(arquivo, "w+");
+  char log_name[100];
+  strcpy(log_name, arquivo);
+  flog = fopen(strcat(log_name, ".log"), "w+");
   return (fp != 0) ? SUCESSO : FALHA;
 }
 
@@ -74,6 +75,9 @@ cry_desc_t * cry_openfs(char * arquivo) {
   if (access(arquivo,F_OK) == -1) {
     return FALHA;
   }
+  char log_name[100];
+  strcpy(log_name, arquivo);
+  flog = fopen(strcat(log_name, ".log"), "r+");
   FILE* fp = fopen(arquivo, "r+");
   descritor_fs->arquivo_host = fp;
   return descritor_fs;
@@ -113,7 +117,6 @@ int create_file(cry_desc_t * cry_desc, char * nome) {
       return -1;
   }
   bloco_inicial[i] = bloco;
-  blocost[bloco].dono = i;
   blocost[bloco].next = NULL;
   return i;
 }
@@ -284,9 +287,11 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   for(int i = 0; i < tamanho; i++){
       buf[i] += cripto[desc_index];
   }
+  fseek(flog, atual * 4096 + posicao_no_bloco, SEEK_SET);
+  fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), flog);
   fseek(descritor_fs->arquivo_host, atual * 4096 + posicao_no_bloco, SEEK_SET);
   fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO - posicao_no_bloco), descritor_fs->arquivo_host);
-	
+
   if(a_escrever == BLOCO - posicao_no_bloco) {
       int bloco_livre = procura_bloco_livre();
       if(bloco_livre == FALHA) {
@@ -294,7 +299,6 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
       }
       blocost[atual].next = &blocost[bloco_livre];
       blocost[bloco_livre].next = NULL;
-      blocost[bloco_livre].dono = blocost[atual].dono;
   }
   
   a_escrever -= MIN(a_escrever, BLOCO - posicao_no_bloco);
@@ -306,8 +310,9 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
       }
       blocost[atual].next = &blocost[bloco_livre];
       blocost[bloco_livre].next = NULL;
-      blocost[bloco_livre].dono = blocost[atual].dono;
       atual = bloco_livre;
+      fseek(flog, atual * BLOCO, SEEK_SET);
+      fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO), flog);
       fseek(descritor_fs->arquivo_host, atual * BLOCO, SEEK_SET);
       fwrite(buf, sizeof(char), MIN(a_escrever, BLOCO), descritor_fs->arquivo_host);
       
@@ -318,7 +323,6 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
           }
           blocost[atual].next = &blocost[bloco_livre];
           blocost[bloco_livre].next = NULL;
-          blocost[bloco_livre].dono = blocost[atual].dono;
       }
       
       a_escrever -= BLOCO;
@@ -333,12 +337,21 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
 }
 
 int ultimo_bloco_livre() {
-  for (int i = 0; i < num_blocos; i++) {
-    if(blocost[i].next == NULL && blocost[i].dono == -1) {
-      return i;
-    }
+  if(livre == NULL) {
+      return -1;
   }
-  return -1;
+  
+  bloco_t* aux = livre;
+  while(aux->next != NULL) {
+      aux = aux->next;
+  }
+  return aux->indice;
+  // for (int i = 0; i < num_blocos; i++) {
+  //   if(blocost[i].next == NULL && blocost[i].dono == -1) {
+  //     return i;
+  //   }
+  // }
+  //return -1;
 }
 
 /** Apaga um arquivo e o fecha.
@@ -362,10 +375,6 @@ int cry_delete(indice_arquivo_t arquivo) {
   } else {
     blocost[bloco_livre].next = &blocost[bloco_inicial[desc_index]];
   }
-  int atual = bloco_inicial[desc_index];
-  do {
-    blocost[atual].dono = -1;
-  } while (blocost[atual++].next != NULL);
   
   desc->nome[0] = 0;
   desc->criacao = 0;

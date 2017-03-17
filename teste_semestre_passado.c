@@ -219,7 +219,6 @@ int test3(){
       return grade;
     }
 
-    int bytes;
     OK(3,3);
     uint32_t vezes = 0;
 
@@ -315,7 +314,6 @@ int test4(){
   char *fsname;
   int grade = 0;
   int i;
-  char * buffer = "aaaaaa";
   cry_desc_t * cryme;
   indice_arquivo_t  FH;
 
@@ -415,7 +413,6 @@ int main(int argc, char ** argv){
 
   int grades[4], maxgrades[4], pesos[4];
   float finalgrade = 0.0;
-  int i;
 
 #define GRADEIT(x)\
   printf("TESTE %d - nota %d de %d, total %f\n", x, grades[x-1],\
