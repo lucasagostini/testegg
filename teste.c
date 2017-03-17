@@ -6,7 +6,7 @@
 #include "simpletest.h"
 
 void teste1() {
-	DESCRIBE("Testa criacao sistema de arquivos");
+	DESCRIBE("1-Testa criacao sistema de arquivos");
 	WHEN("Nenhum sistema de arquivo ainda existe");
 	IF("Um sistema Criado");
 	THEN("A funcao retornara SUCESSO");
@@ -14,7 +14,7 @@ void teste1() {
 }
 
 void teste2() {
-	DESCRIBE("Testa criacao sistema de arquivos");
+	DESCRIBE("2-Testa criacao sistema de arquivos");
 	WHEN("Dois sistemas sao criados com mesmo nome");
 	IF("Dois Sistemas de Arquivos com mesmo nome");
 	THEN("A funcao retorna FALHA");
@@ -23,7 +23,7 @@ void teste2() {
 }
 
 void teste3() {
-	DESCRIBE("Testa criacao sistema de arquivos");
+	DESCRIBE("3-Testa criacao sistema de arquivos");
 	WHEN("Tamanho e menor que o minimo");
 	IF("Numero de blocos menor que 19");
 	THEN("O sistema nao pode ser criado");
@@ -31,7 +31,7 @@ void teste3() {
 }
 
 void teste4() {
-	DESCRIBE("Testa a abertura do sistema de arquivos");
+	DESCRIBE("4-Testa a abertura do sistema de arquivos");
 	WHEN("Um sistema e aberto");
 	IF("O sistema ja existe");
 	THEN("A funcao retorna sucesso");
@@ -40,7 +40,7 @@ void teste4() {
 }
 
 void teste5() {
-	DESCRIBE("Testa a abertura do sistema de arquivos");
+	DESCRIBE("5-Testa a abertura do sistema de arquivos");
 	WHEN("Nao existe nenhum Sistema");
 	IF("Sistema nao foi criado");
 	THEN("A funcao retorna falha");
@@ -48,12 +48,12 @@ void teste5() {
 }
 
 cry_desc_t * openfs(char* name) {
-	initfs(name,1000);
+	initfs(name,100000);
 	return cry_openfs(name);
 }
 
 void teste6() {
-	DESCRIBE("Testa a abertura de um ou mais arquivos");
+	DESCRIBE("6-Testa a abertura de um ou mais arquivos");
 	WHEN("Sistema de arquivos ja existe, mas o arquivo nao");
 	IF("Arquivo nao existe e atributo eh de LEITURAESCRITA");
 	THEN("O arquivo deve ser criado e a funcao retorna o file handler");
@@ -62,7 +62,7 @@ void teste6() {
 }
 
 void teste7() {
-	DESCRIBE("Testa a abertura de um ou mais arquivos");
+	DESCRIBE("7-Testa a abertura de um ou mais arquivos");
 	WHEN("Um mesmo arquivo eh aberto mais de uma vez");
 	IF("Arquivo ja esta aberto");
 	THEN("O File Handler retornado deve ser o do arquivo ja aberto");
@@ -71,7 +71,7 @@ void teste7() {
 }
 
 void teste8() {
-	DESCRIBE("Testa a abertura de um ou mais arquivos");
+	DESCRIBE("8-Testa a abertura de um ou mais arquivos");
 	WHEN("Dois arquivos sao criados e abertos");
 	IF("Dois arquivos diferentes sao abertos");
 	THEN("A funcao deve retornar diferentes file handlers");
@@ -80,16 +80,16 @@ void teste8() {
 }
 
 void teste9() {
-	DESCRIBE("Testa a abertura de um ou mais arquivos");
+	DESCRIBE("9-Testa a abertura de um ou mais arquivos");
 	WHEN("O acesso e de LEITURA");
 	IF("Acesso eh LEITURA e arquivo nao existe");
 	THEN("A funcao deve retornar FALHA");
 	cry_desc_t * fs = openfs("dc/cripto9");
-	isEqual(cry_open(fs, "arquivo1", LEITURA, 0), 0);
+	isEqual(cry_open(fs, "arquivo9", LEITURA, 0), 0);
 }
 
 void teste10() {
-	DESCRIBE("Testa o fechamento de um arquivo");
+	DESCRIBE("10-Testa o fechamento de um arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo esta aberto");
 	THEN("A funcao deve retornar SUCESSO");
@@ -99,7 +99,7 @@ void teste10() {
 }
 
 void teste11() {
-	DESCRIBE("Testa a abertura de um arquivo apos o fechamento de outro");
+	DESCRIBE("11-Testa a abertura de um arquivo apos o fechamento de outro");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo 1 esta aberto e 2 fechado");
 	THEN("A funcao deve retornar SUCESSO");
@@ -111,7 +111,7 @@ void teste11() {
 }
 
 void teste12() {
-	DESCRIBE("Testa a abertura de 256 arquivos");
+	DESCRIBE("12-Testa a abertura de 256 arquivos");
 	WHEN("Nao tem nenhum arquivo aberto");
 	IF("256 arquivos sao abertos");
 	THEN("A funcao deve retornar sucesso");
@@ -127,7 +127,7 @@ void teste12() {
 }
 
 void teste13() {
-	DESCRIBE("Testa a escrita simples em um arquivo");
+	DESCRIBE("13-Testa a escrita simples em um arquivo");
 	WHEN("Arquivo esta aberto");
 	IF("Temos espaco para escrever");
 	THEN("A funcao escreve e retorna sucesso");
@@ -137,7 +137,7 @@ void teste13() {
 }
 
 void teste14() {
-	DESCRIBE("Testa a escrita simples em um arquivo");
+	DESCRIBE("14-Testa a escrita simples em um arquivo");
 	WHEN("Arquivo esta fechado");
 	IF("Arquivo fechado");
 	THEN("A funcao retorna falha");
@@ -148,7 +148,7 @@ void teste14() {
 }
 
 void teste15() {
-	DESCRIBE("Testa a escrita simples em um arquivo");
+	DESCRIBE("15-Testa a escrita simples em um arquivo");
 	WHEN("Quando o arquivo eh fechado e depois reaberto");
 	IF("Arquivo esta aberto");
 	THEN("A funcao deve retornar SUCESSO");
@@ -160,7 +160,7 @@ void teste15() {
 }
 
 void teste16() {
-	DESCRIBE("Testa a leitura simples de um arquivo");
+	DESCRIBE("16-Testa a leitura simples de um arquivo");
 	WHEN("Ele esta vazio");
 	IF("Nao tem nada escrito");
 	THEN("A funcao nao pode ler nada, retorna falha");
@@ -171,7 +171,7 @@ void teste16() {
 }
 
 void teste17() {
-	DESCRIBE("Testa a leitura simples de um arquivo");
+	DESCRIBE("17-Testa a leitura simples de um arquivo");
 	WHEN("Ele possui dados escritos");
 	IF("O que foi lido eh igual ao que foi escrito");
 	THEN("A funcao deve retornar sucesso");
@@ -185,7 +185,7 @@ void teste17() {
 }
 
 void teste18() {
-	DESCRIBE("Testa a funcao seek");
+	DESCRIBE("18-Testa a funcao seek");
 	WHEN("Temos dados escritos no arquivo");
 	IF("Damos seek para a posicao 2 do arquivo");
 	THEN("A leitura deve ser feita a partir da segunda posicao");
@@ -200,7 +200,7 @@ void teste18() {
 }
 
 void teste19() {
-	DESCRIBE("Testa a funcao seek");
+	DESCRIBE("19-Testa a funcao seek");
 	WHEN("Escrevemos 7 char em um arquivo");
 	IF("Damos seek para a posicao 7");
 	THEN("A funcao deve retornar sucesso");
@@ -211,7 +211,7 @@ void teste19() {
 }
 
 void teste20() {
-	DESCRIBE("Testa a funcao seek");
+	DESCRIBE("20-Testa a funcao seek");
 	WHEN("Escrevemos 7 char em um arquivo");
 	IF("Damos seek para a posicao 8");
 	THEN("A funcao deve retornar falha");
@@ -222,7 +222,7 @@ void teste20() {
 }
 
 void teste21() {
-	DESCRIBE("Testa a funcao delete");
+	DESCRIBE("21-Testa a funcao delete");
 	WHEN("Um arquivo existe com dados dentro");
 	IF("Mandamos deletar ele e depois recriar");
 	THEN("O arquivo deve estar vazio, entao o seek(1) deve retornar falha");
@@ -235,7 +235,7 @@ void teste21() {
 }
 
 void teste22() {
-	DESCRIBE("Testa a funcao delete");
+	DESCRIBE("22-Testa a funcao delete");
 	WHEN("Um arquivo existe com dados dentro");
 	IF("Mandamos deletar ele e depois abrir em modo leitura");
 	THEN("A abertura deve retornar falha pois o arquivo nao existe e o modo eh leitura");
@@ -248,7 +248,7 @@ void teste22() {
 }
 
 void teste23() {
-	DESCRIBE("Testa a leitura do tempo de criacao do arquivo");
+	DESCRIBE("23-Testa a leitura do tempo de criacao do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de criacao do mesmo");
@@ -259,7 +259,7 @@ void teste23() {
 }
 
 void teste24() {
-	DESCRIBE("Testa a leitura do tempo de acesso do arquivo");
+	DESCRIBE("24-Testa a leitura do tempo de acesso do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de criacao do mesmo");
@@ -270,7 +270,7 @@ void teste24() {
 }
 
 void teste25() {
-	DESCRIBE("Testa a leitura do tempo de modificacao do arquivo");
+	DESCRIBE("25-Testa a leitura do tempo de modificacao do arquivo");
 	WHEN("O File Handler eh passado como parametro");
 	IF("Arquivo existe");
 	THEN("A funcao deve retornar o tempo de modificacao do mesmo");
@@ -281,7 +281,7 @@ void teste25() {
 }
 
 void teste26() {
-	DESCRIBE("Testa leitura de um mesmo arquivo com duas chaves diferentes");
+	DESCRIBE("26-Testa leitura de um mesmo arquivo com duas chaves diferentes");
 	WHEN("Abrimos um mesmo arquivo com duas chaves diferentes");
 	IF("Escrevermos com uma chave e depois lermos usando chaves diferentes");
 	THEN("As strings nao podem ser iguais");
@@ -297,7 +297,7 @@ void teste26() {
 	isNotEqual(strncmp(out1, out2, lidos), 0);
 }
 void teste27() {
-	DESCRIBE("Testa leitura de um arquivo com uma chave");
+	DESCRIBE("27-Testa leitura de um arquivo com uma chave");
 	WHEN("Abrimos um arquivo usando somente uma chave");
 	IF("Escrevermos com uma chave e depois lermos com a mesma chave");
 	THEN("As strings devem ser iguais");
@@ -311,7 +311,7 @@ void teste27() {
 }
 
 void teste28() {
-	DESCRIBE("Testa escrita/leitura de um mesmo arquivo com duas chaves diferentes");
+	DESCRIBE("28-Testa escrita/leitura de um mesmo arquivo com duas chaves diferentes");
 	WHEN("Abrimos um mesmo arquivo com duas chaves diferentes");
 	IF("Escrevermos com chaves diferentes e depois lermos usando a chave certa");
 	THEN("As strings devem fazer sentido e serem iguais");
@@ -329,6 +329,29 @@ void teste28() {
 	isEqual(lidos2, 7);
 	cry_close(arquivo2);
 	isEqual(strncmp(out1, out2, lidos2), 0);
+}
+
+void teste_final() {
+	DESCRIBE("Final- Testa todas as funcoes do sistema de arquivos");
+	WHEN("Executamos todas as funcoes");
+	IF("Todas funcionarem corretamente");
+	THEN("O retorno deve ser SUCESSO");
+	cry_desc_t * fs = openfs("dc/cripto");
+	char out1[7],out2[7];
+	int arquivo1 = cry_open(fs, "arquivo1", LEITURAESCRITA, 2);
+	cry_write(arquivo1, 7, "teste28");
+	int lidos1 = cry_read(arquivo1, 7, out1);
+	isEqual(lidos1, 7);
+	isEqual(cry_close(arquivo1), SUCESSO);
+	int arquivo2 = cry_open(fs, "arquivo1", LEITURAESCRITA, 3);
+	cry_write(arquivo2, 7, "teste28");
+	isEqual(cry_seek(arquivo2, 7),SUCESSO);
+	int lidos2 = cry_read(arquivo2, 7, out2);
+	isEqual(lidos2, 7);
+	isGreaterThan(cry_accessed(arquivo2),0);
+	isGreaterThan(cry_creation(arquivo2),0);
+	isGreaterThan(cry_last_modified(arquivo2),0);
+	isGreaterThan(cry_delete(arquivo2),0);
 }
 int main() {
 	teste1();
@@ -359,5 +382,6 @@ int main() {
 	teste26();
 	teste27();
 	teste28();
+	teste_final();
 	return 0;
 }
