@@ -1,4 +1,5 @@
 #include "cryfs.h"
+
 #include <unistd.h>
 #include <string.h>
 
@@ -27,7 +28,7 @@ typedef struct bloco {
 
 bloco_t* livre;
 int num_blocos;
-bloco_t blocost[3000000000];
+bloco_t blocost[30000000];
 int bloco_inicial[256];
 
 int cripto[256];
