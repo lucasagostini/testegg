@@ -354,6 +354,8 @@ void teste_final() {
 	isGreaterThan(cry_delete(arquivo2),0);
 }
 int main() {
+	int tamanho=sizeof(descritor_t)*256/4096;
+	printf("Tamanho_blocos = %d\n",tamanho);
 	teste1();
 	teste2();
 	teste3();

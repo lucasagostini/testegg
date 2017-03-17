@@ -3,6 +3,7 @@
 #include "cryfs.h"
 #include <assert.h>
 #include <string.h>
+#include <unistd.h>
 
 #define TESTDIR "a"
 
@@ -30,8 +31,6 @@ int test1(){
 
   /* nome do arquivo sera testes/testexxx */
   assert(fsname = concat(TESTDIR, "test1"));
-
-  printf("Metadados %lu\n", METADADOS);
 
   /* poucos blocos */
   if (initfs(fsname, 5)==FALHA){
@@ -346,6 +345,9 @@ int test4(){
   /* cria 256 arquivos de 1 bloco */
   for(i=0; i<256; i++){
     char name[80]; 
+    for(int j=0;j<80;j++){
+      name[j]=0;
+    }
     sprintf(name,"a%d",i);
   //  printf("namee: %s\n",name);
     FH = cry_open(cryme, name, ESCRITA, i);
@@ -375,9 +377,12 @@ int test4(){
       for(int j = 0; j < 80; j++) {
           tmp[j] = 0;
       }
+      for(int j=0;j<80;j++){
+          name[j]=0;
+      }
     sprintf(name,"a%d",i);
     FH = cry_open(cryme, name, LEITURA, i);
-      //printf("FH - %d --  name -- %s FILENAME -- %s -- INDEX %d \n",FH, name, cryme->abertos[FH].arquivo->nome, cryme->abertos[FH].arquivo->indices);
+    //printf("FH - %d --  name -- %s FILENAME -- %s  \n",FH, name, cryme->abertos[FH].arquivo->nome);
     if (FH==FALHA){
       FAIL(4,5);
       return grade;
