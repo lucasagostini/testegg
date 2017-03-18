@@ -63,6 +63,7 @@ int initfs(char * arquivo, int blocos) {
   strcpy(log_name, arquivo);
   flog = fopen(strcat(log_name, ".log"), "w+");
   fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, fp);
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return (fp != 0) ? SUCESSO : FALHA;
 }
 
@@ -159,8 +160,8 @@ indice_arquivo_t cry_open(cry_desc_t *cry_desc, char * nome,  int acesso, char d
   cry_desc->abertos[indice_aberto].acesso = acesso;
   cry_desc->abertos[indice_aberto].posicao = 0;
   cripto[indice_aberto] = deslocamento;
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return indice_aberto + 1;
 }
 
@@ -253,8 +254,8 @@ uint32_t cry_read(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   for(int i = 0; i < tamanho; i++){
       buffer[i] -= cripto[desc_index];
   }
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return lidos;
 }
 
@@ -337,8 +338,8 @@ int cry_write(indice_arquivo_t arquivo, uint32_t tamanho, char *buffer) {
   // tamanho - posicao + blocos_livres()*4096;
   // for ()
   time(&desc->modificacao);
-  //fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-//  //fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return SUCESSO;
 }
 
@@ -389,8 +390,8 @@ int cry_delete(indice_arquivo_t arquivo) {
   desc->tamanho = 0;
   
   descritor_fs->abertos[indice].arquivo = NULL;
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return SUCESSO;
 }
 
@@ -426,8 +427,8 @@ time_t cry_creation(indice_arquivo_t arquivo) {
   }
   
   descritor_t* desc = descritor_fs->abertos[indice].arquivo;
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return desc->criacao;
 }
 
@@ -443,8 +444,8 @@ time_t cry_accessed(indice_arquivo_t arquivo) {
   }
   
   descritor_t* desc = descritor_fs->abertos[indice].arquivo;
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return desc->ultimo_acesso;
 }
 
@@ -460,7 +461,7 @@ time_t cry_last_modified(indice_arquivo_t arquivo) {
   }
   
   descritor_t* desc = descritor_fs->abertos[indice].arquivo;
-  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);
-  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);*/
+  /*fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, descritor_fs->arquivo_host);*/
+  fwrite(descritor_fs->descritores, sizeof(descritor_t), 256, flog);
   return desc->modificacao;
 }
