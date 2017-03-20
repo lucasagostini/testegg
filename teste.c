@@ -6,13 +6,13 @@
 #include "simpletest.h"
 
 cry_desc_t * openfs() {
-	initfs("dc/cripto",100000);
-	return cry_openfs("dc/cripto");
+	initfs("cripto",100000);
+	return cry_openfs("cripto");
 }
 
 int removendo(){
-	remove("dc/cripto");
-	remove("dc/cripto.log");
+	remove("cripto");
+	remove("cripto.log");
 	return 0;
 }
 
@@ -22,7 +22,7 @@ void teste1() {
 	WHEN("Nenhum sistema de arquivo ainda existe");
 	IF("Um sistema Criado");
 	THEN("A funcao retornara SUCESSO");
-	isEqual(initfs("dc/cripto",19),SUCESSO);
+	isEqual(initfs("cripto",19),SUCESSO);
 	removendo();
 }
 
@@ -31,8 +31,8 @@ void teste2() {
 	WHEN("Dois sistemas sao criados com mesmo nome");
 	IF("Dois Sistemas de Arquivos com mesmo nome");
 	THEN("A funcao retorna FALHA");
-	initfs("dc/cripto",200);
-	isEqual(initfs("dc/cripto",200),FALHA);
+	initfs("cripto",200);
+	isEqual(initfs("cripto",200),FALHA);
 	removendo();
 }
 
@@ -41,7 +41,7 @@ void teste3() {
 	WHEN("Tamanho e menor que o minimo");
 	IF("Numero de blocos menor que 19");
 	THEN("O sistema nao pode ser criado");
-	isEqual(initfs("dc/cripto",18),FALHA);
+	isEqual(initfs("cripto",18),FALHA);
 	removendo();
 }
 
@@ -50,8 +50,8 @@ void teste4() {
 	WHEN("Um sistema e aberto");
 	IF("O sistema ja existe");
 	THEN("A funcao retorna sucesso");
-	initfs("dc/cripto",19);
-	isNotNull(cry_openfs("dc/cripto"));
+	initfs("cripto",19);
+	isNotNull(cry_openfs("cripto"));
 	removendo();
 }
 
@@ -60,7 +60,7 @@ void teste5() {
 	WHEN("Nao existe nenhum Sistema");
 	IF("Sistema nao foi criado");
 	THEN("A funcao retorna falha");
-	isNull(cry_openfs("dc/cripto"));
+	isNull(cry_openfs("cripto"));
 	removendo();
 }
 
@@ -135,7 +135,7 @@ void teste12() {
 	WHEN("Nao tem nenhum arquivo aberto");
 	IF("256 arquivos sao abertos");
 	THEN("A funcao deve retornar sucesso");
-	cry_desc_t * fs = openfs("dc/cripto2");
+	cry_desc_t * fs = openfs("cripto2");
 	char str[12];
 	for (int i = 1; i <= 256; i++) {
 		sprintf(str, "%d", i);
