@@ -1,5 +1,5 @@
+#include <stdint.h>
 #include "cryfs.h"
-
 #include <unistd.h>
 #include <string.h>
 
