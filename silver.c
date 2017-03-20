@@ -6,7 +6,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "simpletest.h"
-
+#define teste "tt"
 #define TESTDIR "kk00"
 
 #define OK(a,b) printf("%s test%d:%d OK %s\n",KGRN,a,b,KNRM)
