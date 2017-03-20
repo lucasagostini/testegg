@@ -3,6 +3,7 @@ CFLAGS=-std=c11 -Wall
 OUTDIR=bin
 
 $(OUTDIR)/cryfs.o: cryfs.h cryfs.c
+	mkdir -p $(OUTDIR) || echo ''
 	$(CC) -c $(CFLAGS) cryfs.c -o $@
 
 teste: clean $(OUTDIR)/cryfs.o simpletest.h teste.c
