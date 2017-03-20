@@ -1,7 +1,7 @@
 #ifndef _CRYFS_H_
 #define _CRYFS_H_
 
-#include <stdint.h>
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
